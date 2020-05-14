@@ -84,7 +84,6 @@ class NpcFish(Actor):
 
         # Delete if we've hit the player
         result = GameEventsManager.consume_event_for_value(CollisionEvent.player_key(), self)
-
         # Delete if we've hit the edge, including a fudge factor
         if len(result) > 0 or self.state.position.x <= bounds_min.x + 2:
             self.delete = True

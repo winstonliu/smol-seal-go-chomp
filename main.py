@@ -6,6 +6,7 @@ import config, geometry
 from actor import PlayerSeal, AddSpeedCommand
 from controller import GameController
 from observer import GameEventsManager
+from collision import CollisionMonitor
 
 """ 
 This is the main file for the game.
@@ -25,6 +26,8 @@ class ActorController:
                 "player": PlayerSeal(),
                 "npcs": list(),
         }
+
+        self.collision_monitor = CollisionMonitor(self.actor_dict)
 
     @property
     def player(self):
@@ -48,6 +51,8 @@ class ActorController:
     def update_actors(self):
         # Create new actors if we've received the signal
         self.listen_to_events()
+        # Check for collisions
+        self.collision_monitor.check_player_collision()
         self.player.update(self.screen_bounds[0], self.screen_bounds[1])
 
         # Mark npcs for deletion so we don't update the list while we're
