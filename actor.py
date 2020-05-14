@@ -1,6 +1,8 @@
 #!/bin/env python3
 
 import geometry
+from observer import GameEventsManager
+from collision import CollisionEvent
 
 class AddSpeedCommand:
     def __init__(self, unit, velocity):
@@ -14,10 +16,11 @@ class AddSpeedCommand:
 class Actor:
     MAX_VELOCITY = geometry.Vector(640.0, 360.0)
 
-    def __init__(self):
-        self.state = geometry.State()
-        self.bounciness = 0
-        self.size = geometry.Vector(0,0)
+    def __init__(self, state = geometry.State(), size = geometry.Vector(0,0), bounciness = 0, is_player = False):
+        self.state = state
+        self.bounciness = bounciness 
+        self.size = size
+        self.is_player = is_player
 
     def update(self, bounds_min, bounds_max):
         self.state.velocity += self.state.acceleration
@@ -44,19 +47,44 @@ class Actor:
         self.state.velocity.x = min(new_velocity.x, self.MAX_VELOCITY.x)
         self.state.velocity.y = min(new_velocity.y, self.MAX_VELOCITY.y)
 
-class PlayerSeal(Actor):
-    """ This class takes care of all player related stuff. """
-
-    def __init__(self):
-        super().__init__()
-        self.state.position = geometry.Vector(100,100)
-        self.size = geometry.Vector(50,50)
-        self.bounciness = 0.2
-        self.state.acceleration = geometry.Vector(0, -0.005)
+    def bounding_box(self):
+        return geometry.Rectangle(self.state.position, self.size)
 
 
     def draw(self):
         return geometry.Rectangle(self.state.position, self.size)
 
+
+class PlayerSeal(Actor):
+    """ This class takes care of all player related stuff. """
+
+    def __init__(self):
+        super().__init__(
+                geometry.State(position=geometry.Vector(100,100)),
+                geometry.Vector(50, 50), 
+                0.2,
+                is_player = True)
+        self.state.acceleration = geometry.Vector(0, -0.005)
+
     def update(self, bounds_min, bounds_max):
+        """ Non-destructive collision event checking """
         super().update(bounds_min, bounds_max)
+
+
+class NpcFish(Actor):
+    """ It's a fish! """
+
+    def __init__(self, state):
+        super().__init__(state, geometry.Vector(10, 10))
+        self.delete = false
+
+    def update(self, bounds_min, bounds_max):
+        """ Destructive event checking """
+        super().update(bounds_min, bounds_max)
+
+        # Delete if we've hit the player
+        result = GameEvents.consume_event_for_value(CollisionEvent.player_key(), self)
+
+        # Delete if we've hit the edge
+        if len(result) > 0 or self.state.position.x <= bounds_min.x:
+            delete = True

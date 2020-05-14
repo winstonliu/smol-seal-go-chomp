@@ -2,9 +2,12 @@
 
 import pygame
 
+EVENT_MAPPING = {
+        "CREATE_NEW_FISH" : pygame.USEREVENT,
+}
+
 class ScreenInfo:
     size = width, height = 1280, 840
-
 
 class MetaColor(type):
     """ 
@@ -18,6 +21,7 @@ class MetaColor(type):
             "blue": (135, 206, 235),
             "green": (144, 238, 144),
             "white": (255, 255, 255),
+            "red": (252, 3, 115),
     }
 
     def __getitem__(cls, color):
