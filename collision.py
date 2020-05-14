@@ -39,5 +39,4 @@ class CollisionMonitor:
         player = self.actor_dict["player"]
         for npc in self.actor_dict["npcs"]:
             if player.bounding_box().contains(npc.bounding_box()):
-                print("Collision detected!")
                 CollisionEvent.register_collision(player, npc, True)
