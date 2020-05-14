@@ -8,19 +8,19 @@ class CollisionEvent(GameEvent):
     def __init__(self, actor_a, actor_b, a_is_player):
         self.a = actor_a
         self.b = actor_b
-        key = COLLISION_KEYS[0] if a_is_player else COLLISION_KEYS[1]
+        key = self.COLLISION_KEYS[0] if a_is_player else self.COLLISION_KEYS[1]
         super().__init__(key)
 
     def contains(self, actor):
         return actor == self.a or actor == self.b
 
-    @staticmethod
-    def player_key():
-        return COLLISION_KEYS[0]
+    @classmethod
+    def player_key(cls):
+        return cls.COLLISION_KEYS[0]
 
-    @staticmethod
-    def npc_key():
-        return COLLISION_KEYS[1]
+    @classmethod
+    def npc_key(cls):
+        return cls.COLLISION_KEYS[1]
 
     @staticmethod
     def register_collision(actor_a, actor_b, a_is_player):

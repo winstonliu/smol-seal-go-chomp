@@ -19,9 +19,13 @@ class GameEventsManager:
     @classmethod
     def notify(cls, key, value):
         if not key in cls.events:
-            cls.events[key] = list(value)
+            cls.events[key] = [value]
         else:
             cls.events[key].append(value)
+
+    @classmethod
+    def notify_with_event(cls, event):
+        cls.notify(event.key, event)
 
     @classmethod
     def consume(cls, key):

@@ -5,6 +5,7 @@ import pygame
 import config, geometry
 from actor import PlayerSeal, AddSpeedCommand
 from controller import GameController
+from observer import GameEventsManager
 
 """ 
 This is the main file for the game.
@@ -33,6 +34,11 @@ class ActorController:
     def npcs(self):
         return self.actor_dict["npcs"]
 
+    def listen_to_events(self):
+        new_actor_list = GameEventsManager.consume("actors_created")
+        if new_actor_list:
+            self.npcs.extend([x.value for x in new_actor_list])
+
     def handle_keypresses(self):
         keys = pygame.key.get_pressed()
         if keys[pygame.K_SPACE]:
@@ -40,6 +46,8 @@ class ActorController:
         return None
 
     def update_actors(self):
+        # Create new actors if we've received the signal
+        self.listen_to_events()
         self.player.update(self.screen_bounds[0], self.screen_bounds[1])
 
         # Mark npcs for deletion so we don't update the list while we're
@@ -75,6 +83,7 @@ def main():
     # Create a game manager
     mananger = GameController(pygame.time.set_timer)
 
+    # TODO switch these out with notify event triggers
     PROCESS_CUSTOM_EVENT = {
             config.EVENT_MAPPING["CREATE_NEW_FISH"]: mananger.create_fish,
     }
@@ -86,7 +95,7 @@ def main():
             if event.type == pygame.QUIT:
                 running = False
                 continue;
-
+ 
             # Process custom events
             if event.type in PROCESS_CUSTOM_EVENT:
                 PROCESS_CUSTOM_EVENT[event.type]()

@@ -57,11 +57,11 @@ class Actor:
 
 class PlayerSeal(Actor):
     """ This class takes care of all player related stuff. """
-
+    SIZE = geometry.Vector(50, 50)
     def __init__(self):
         super().__init__(
-                geometry.State(position=geometry.Vector(100,100)),
-                geometry.Vector(50, 50), 
+                geometry.State(position = geometry.Vector(100,100)),
+                self.SIZE, 
                 0.2,
                 is_player = True)
         self.state.acceleration = geometry.Vector(0, -0.005)
@@ -73,18 +73,18 @@ class PlayerSeal(Actor):
 
 class NpcFish(Actor):
     """ It's a fish! """
-
+    SIZE = geometry.Vector(10, 10)
     def __init__(self, state):
-        super().__init__(state, geometry.Vector(10, 10))
-        self.delete = false
+        super().__init__(state, self.SIZE)
+        self.delete = False
 
     def update(self, bounds_min, bounds_max):
         """ Destructive event checking """
         super().update(bounds_min, bounds_max)
 
         # Delete if we've hit the player
-        result = GameEvents.consume_event_for_value(CollisionEvent.player_key(), self)
+        result = GameEventsManager.consume_event_for_value(CollisionEvent.player_key(), self)
 
-        # Delete if we've hit the edge
-        if len(result) > 0 or self.state.position.x <= bounds_min.x:
-            delete = True
+        # Delete if we've hit the edge, including a fudge factor
+        if len(result) > 0 or self.state.position.x <= bounds_min.x + 2:
+            self.delete = True
