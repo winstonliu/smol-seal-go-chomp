@@ -1,9 +1,11 @@
 #!/bin/env python3
 
 import pygame
+import functools
 
-import config, geometry
-from actor import PlayerSeal, AddSpeedCommand
+import actor
+import config
+import geometry
 from controller import GameController
 from observer import GameEventsManager
 from collision import CollisionMonitor
@@ -23,11 +25,12 @@ class ActorController:
         self.npc_bounds = (screen_min - geometry.Vector(200,0), )
 
         self.actor_dict = {
-                "player": PlayerSeal(),
+                "player": actor.PlayerSeal(),
                 "npcs": list(),
         }
 
         self.collision_monitor = CollisionMonitor(self.actor_dict)
+        self.game_over = False
 
     @property
     def player(self):
@@ -45,7 +48,7 @@ class ActorController:
     def handle_keypresses(self):
         keys = pygame.key.get_pressed()
         if keys[pygame.K_SPACE]:
-            return AddSpeedCommand(self.player, self.add_velocity)
+            return actor.AddSpeedCommand(self.player, self.add_velocity)
         return None
 
     def update_actors(self):
@@ -53,6 +56,13 @@ class ActorController:
         self.listen_to_events()
         # Check for collisions
         self.collision_monitor.check_player_collision()
+
+        # Check if we've received a game over message
+        result = GameEventsManager.consume("got_eaten")
+        if (result):
+            self.game_over = True
+            return 
+
         self.player.update(self.screen_bounds[0], self.screen_bounds[1])
 
         # Mark npcs for deletion so we don't update the list while we're
@@ -71,14 +81,21 @@ class ActorController:
 
         # Draw NPCs
         for n in self.npcs:
-            pygame.draw.rect(screen, config.Color["red"],
+            pygame.draw.rect(screen, config.Color[n.color],
                     config.rect_to_pygame(n.draw()))
 
+    def draw_game_over(self, screen):
+        text = config.ScreenInfo.font.render("You got eaten! Happy Birthday!!", config.Color["black"], config.Color["white"])
+        text_rect = text.get_rect()
+        # Center the text
+        text_rect.topleft = ((config.ScreenInfo.width - text_rect.width) / 2 , (config.ScreenInfo.height - text_rect.height) / 2)
+        screen.blit(text, text_rect)
 
 
 def main():
     """ This is the main function that runs everything else in the game. """
     pygame.init()
+    config.ScreenInfo.font = pygame.font.Font("freesansbold.ttf", 24)
     screen = pygame.display.set_mode(config.ScreenInfo.size)
 
     # Create an actor controller
@@ -90,7 +107,10 @@ def main():
 
     # TODO switch these out with notify event triggers
     PROCESS_CUSTOM_EVENT = {
-            config.EVENT_MAPPING["CREATE_NEW_FISH"]: mananger.create_fish,
+            config.EVENT_MAPPING["CREATE_NEW_FISH"]:
+                    functools.partial(mananger.create_npc, actor.NpcFish),
+            config.EVENT_MAPPING["CREATE_NEW_SHARK"]: 
+                    functools.partial(mananger.create_npc, actor.NpcShark),
     }
 
     # Main loop, this runs continuously until the player decides to quit
@@ -109,9 +129,14 @@ def main():
         if (command):
             command.execute()
 
-        controller.update_actors()
         screen.fill(config.Color["black"])
-        controller.draw_actors(screen)
+
+        if not controller.game_over:
+            controller.update_actors()
+            controller.draw_actors(screen)
+        else:
+            controller.draw_game_over(screen)
+
         pygame.display.flip()
 
 

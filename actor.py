@@ -1,7 +1,7 @@
 #!/bin/env python3
 
 import geometry
-from observer import GameEventsManager
+from observer import GameEventsManager, GameEvent
 from collision import CollisionEvent
 
 class AddSpeedCommand:
@@ -21,6 +21,7 @@ class Actor:
         self.bounciness = bounciness 
         self.size = size
         self.is_player = is_player
+        self.color = "white"
 
     def update(self, bounds_min, bounds_max):
         self.state.velocity += self.state.acceleration
@@ -77,6 +78,7 @@ class NpcFish(Actor):
     def __init__(self, state):
         super().__init__(state, self.SIZE)
         self.delete = False
+        self.color = "red"
 
     def update(self, bounds_min, bounds_max):
         """ Destructive event checking """
@@ -85,5 +87,31 @@ class NpcFish(Actor):
         # Delete if we've hit the player
         result = GameEventsManager.consume_event_for_value(CollisionEvent.player_key(), self)
         # Delete if we've hit the edge, including a fudge factor
-        if len(result) > 0 or self.state.position.x <= bounds_min.x + 2:
+        if len(result) > 0 or self.state.position.x <= bounds_min.x + 1:
             self.delete = True
+
+
+class AteBySharkEvent(GameEvent):
+    def __init__(self):
+        super().__init__("got_eaten")
+
+class NpcShark(Actor):
+    """ Chomp! """
+    SIZE = geometry.Vector(75, 25)
+    def __init__(self, state):
+        super().__init__(state, self.SIZE)
+        self.delete = False
+        self.color = "purple"
+
+    def update(self, bounds_min, bounds_max):
+        """ Destructive event checking """
+        super().update(bounds_min, bounds_max)
+
+        # Delete if we've hit the edge, including a fudge factor
+        if self.state.position.x <= bounds_min.x + 1:
+            self.delete = True
+
+        # Trigger an end game event if we've hit the player
+        result = GameEventsManager.consume_event_for_value(CollisionEvent.player_key(), self)
+        if len(result) > 0:
+            GameEventsManager.notify_with_event(AteBySharkEvent())

@@ -56,3 +56,6 @@ class State:
         self.position = position
         self.velocity = velocity
         self.acceleration = acceleration
+
+    def __str__(self):
+        return "[" + "p:" + str(self.position) + "," + "v:" + str(self.velocity) + "," + "a:" + str(self.acceleration) + "]"

@@ -4,10 +4,12 @@ import pygame
 
 EVENT_MAPPING = {
         "CREATE_NEW_FISH" : pygame.USEREVENT,
+        "CREATE_NEW_SHARK" : pygame.USEREVENT + 1,
 }
 
 class ScreenInfo:
     size = width, height = 1280, 840
+    font = None
 
 class MetaColor(type):
     """ 
@@ -22,6 +24,7 @@ class MetaColor(type):
             "green": (144, 238, 144),
             "white": (255, 255, 255),
             "red": (252, 3, 115),
+            "purple": (191, 66, 245),
     }
 
     def __getitem__(cls, color):
@@ -30,7 +33,6 @@ class MetaColor(type):
 
 class Color(object, metaclass=MetaColor):
     pass
-
 
 def rect_to_pygame(rectangle):
     return pygame.Rect(rectangle.top_right_corner.x, rectangle.top_right_corner.y , rectangle.size.x, rectangle.size.y)
