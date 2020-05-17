@@ -1,8 +1,7 @@
 #!/bin/env python3
 
 import geometry
-from observer import GameEventsManager, GameEvent
-from collision import CollisionEvent
+import events
 
 class AddSpeedCommand:
     def __init__(self, unit, velocity):
@@ -22,6 +21,9 @@ class Actor:
         self.size = size
         self.is_player = is_player
         self.color = "white"
+
+    def set_size(self, size):
+        self.size = size
 
     def set_bounds(self, bounds_min, bounds_max):
         self.bmin = bounds_min
@@ -88,15 +90,10 @@ class NpcFish(Actor):
         super().update()
 
         # Delete if we've hit the player
-        result = GameEventsManager.consume_event_for_value(CollisionEvent.player_key(), self)
+        result = events.GameEventsManager.consume_event_for_value(events.CollisionEvent.player_key(), self)
         # Delete if we've hit the edge, including a fudge factor
         if len(result) > 0 or self.state.position.x <= self.bmin.x + 1:
             self.delete = True
-
-
-class AteBySharkEvent(GameEvent):
-    def __init__(self):
-        super().__init__("got_eaten")
 
 
 class NpcShark(Actor):
@@ -116,6 +113,6 @@ class NpcShark(Actor):
             self.delete = True
 
         # Trigger an end game event if we've hit the player
-        result = GameEventsManager.consume_event_for_value(CollisionEvent.player_key(), self)
+        result = events.GameEventsManager.consume_event_for_value(events.CollisionEvent.player_key(), self)
         if len(result) > 0:
-            GameEventsManager.notify_with_event(AteBySharkEvent())
+            events.GameEventsManager.notify_with_event(events.AteBySharkEvent())

@@ -6,14 +6,12 @@ import functools
 import actor
 import config
 import geometry
-# import assets
+import assets
+import events
 from controller import GameController
-from observer import GameEventsManager
 from collision import CollisionMonitor
 
-""" 
-This is the main file for the game.
-"""
+""" This is the main file for the game.  """
 
 class ActorController:
     def __init__(self, screen_min, screen_max):
@@ -43,7 +41,7 @@ class ActorController:
         return self.actor_dict["npcs"]
 
     def listen_to_events(self):
-        new_actor_list = GameEventsManager.consume("actors_created")
+        new_actor_list = events.GameEventsManager.consume("actors_created")
         if new_actor_list:
             new_actors = [x.value for x in new_actor_list]
             # Set bounds on new actors
@@ -62,10 +60,11 @@ class ActorController:
         # Create new actors if we've received the signal
         self.listen_to_events()
         # Check for collisions
+        # TODO replace with sprite collisions
         self.collision_monitor.check_player_collision()
 
         # Check if we've received a game over message
-        result = GameEventsManager.consume("got_eaten")
+        result = events.GameEventsManager.consume("got_eaten")
         if (result):
             self.game_over = True
             return 

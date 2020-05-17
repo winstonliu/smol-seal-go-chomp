@@ -6,14 +6,9 @@ import actor
 import config
 import geometry
 
-from observer import GameEventsManager, GameEvent
+import events
 
 """ Game controller """
-
-class NewActorEvent(GameEvent):
-    def __init__(self, fish):
-        super().__init__("actors_created")
-        self.value = fish
 
 class GameController:
     def __init__(self, set_timer_fcn):
@@ -33,4 +28,4 @@ class GameController:
 
         npc_state.velocity.x = -0.2
         new_npc = npc_type(npc_state)
-        GameEventsManager.notify_with_event(NewActorEvent(new_npc))
+        events.GameEventsManager.notify_with_event(events.NewActorEvent(new_npc))
