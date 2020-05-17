@@ -6,15 +6,13 @@ import functools
 import actor
 import config
 import geometry
+# import assets
 from controller import GameController
 from observer import GameEventsManager
 from collision import CollisionMonitor
 
 """ 
 This is the main file for the game.
-
-This game has been purposefully designed such this (and config.py) are the only file that imports pygame. This way, the code can be easily reused for future projects.
-
 """
 
 class ActorController:
@@ -22,10 +20,14 @@ class ActorController:
         self.add_velocity = geometry.Vector(0, 0.01)
 
         self.screen_bounds = (screen_min, screen_max)
-        self.npc_bounds = (screen_min - geometry.Vector(200,0), )
+        self.npc_bounds = (screen_min - geometry.Vector(200,0), screen_max)
+        
+        player = actor.PlayerSeal()
+        # Set bounds
+        player.set_bounds(self.screen_bounds[0], self.screen_bounds[1])
 
         self.actor_dict = {
-                "player": actor.PlayerSeal(),
+                "player": player,
                 "npcs": list(),
         }
 
@@ -43,7 +45,12 @@ class ActorController:
     def listen_to_events(self):
         new_actor_list = GameEventsManager.consume("actors_created")
         if new_actor_list:
-            self.npcs.extend([x.value for x in new_actor_list])
+            new_actors = [x.value for x in new_actor_list]
+            # Set bounds on new actors
+            for n in new_actors:
+                n.set_bounds(self.screen_bounds[0], self.screen_bounds[1])
+            # Add new actors to the npc list
+            self.npcs.extend(new_actors)
 
     def handle_keypresses(self):
         keys = pygame.key.get_pressed()
@@ -63,15 +70,16 @@ class ActorController:
             self.game_over = True
             return 
 
-        self.player.update(self.screen_bounds[0], self.screen_bounds[1])
+        self.player.update()
 
         # Mark npcs for deletion so we don't update the list while we're
         # iterating through it
         mark_for_deletion = list()
         for n in self.npcs:
-            n.update(self.screen_bounds[0], self.screen_bounds[1])
+            n.update()
             if n.delete:
                 mark_for_deletion.append(n)
+
         # Delete marked npcs
         for d in mark_for_deletion:
             self.npcs.remove(d)
@@ -88,7 +96,7 @@ class ActorController:
         text = config.ScreenInfo.font.render("You got eaten! Happy Birthday!!", config.Color["black"], config.Color["white"])
         text_rect = text.get_rect()
         # Center the text
-        text_rect.topleft = ((config.ScreenInfo.width - text_rect.width) / 2 , (config.ScreenInfo.height - text_rect.height) / 2)
+        text_rect.topleft = (int((config.ScreenInfo.width - text_rect.width) / 2.0), int((config.ScreenInfo.height - text_rect.height) / 2.0))
         screen.blit(text, text_rect)
 
 

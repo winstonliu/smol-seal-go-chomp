@@ -23,22 +23,26 @@ class Actor:
         self.is_player = is_player
         self.color = "white"
 
-    def update(self, bounds_min, bounds_max):
+    def set_bounds(self, bounds_min, bounds_max):
+        self.bmin = bounds_min
+        self.bmax = bounds_max
+
+    def update(self):
         self.state.velocity += self.state.acceleration
         new_position = self.state.position + self.state.velocity
 
         # Correct bounds for actor size
-        bounds_max -= self.size
+        bounds_max = self.bmax - self.size
 
         # Bounciness behaviour
-        if new_position.x > bounds_max.x or new_position.x < bounds_min.x:
+        if new_position.x > bounds_max.x or new_position.x < self.bmin.x:
             self.state.velocity.x = -self.state.velocity.x * self.bounciness
-        if new_position.y > bounds_max.y or new_position.y < bounds_min.y:
+        if new_position.y > bounds_max.y or new_position.y < self.bmin.y:
             self.state.velocity.y = -self.state.velocity.y * self.bounciness
 
         # Bound the position
-        new_position.x = max(min(new_position.x, bounds_max.x), bounds_min.x)
-        new_position.y = max(min(new_position.y, bounds_max.y), bounds_min.y)
+        new_position.x = max(min(new_position.x, bounds_max.x), self.bmin.x)
+        new_position.y = max(min(new_position.y, bounds_max.y), self.bmin.y)
 
         self.state.position = new_position
 
@@ -67,9 +71,8 @@ class PlayerSeal(Actor):
                 is_player = True)
         self.state.acceleration = geometry.Vector(0, -0.005)
 
-    def update(self, bounds_min, bounds_max):
-        """ Non-destructive collision event checking """
-        super().update(bounds_min, bounds_max)
+    def update(self):
+        super().update()
 
 
 class NpcFish(Actor):
@@ -80,20 +83,21 @@ class NpcFish(Actor):
         self.delete = False
         self.color = "red"
 
-    def update(self, bounds_min, bounds_max):
+    def update(self):
         """ Destructive event checking """
-        super().update(bounds_min, bounds_max)
+        super().update()
 
         # Delete if we've hit the player
         result = GameEventsManager.consume_event_for_value(CollisionEvent.player_key(), self)
         # Delete if we've hit the edge, including a fudge factor
-        if len(result) > 0 or self.state.position.x <= bounds_min.x + 1:
+        if len(result) > 0 or self.state.position.x <= self.bmin.x + 1:
             self.delete = True
 
 
 class AteBySharkEvent(GameEvent):
     def __init__(self):
         super().__init__("got_eaten")
+
 
 class NpcShark(Actor):
     """ Chomp! """
@@ -103,12 +107,12 @@ class NpcShark(Actor):
         self.delete = False
         self.color = "purple"
 
-    def update(self, bounds_min, bounds_max):
+    def update(self):
         """ Destructive event checking """
-        super().update(bounds_min, bounds_max)
+        super().update()
 
         # Delete if we've hit the edge, including a fudge factor
-        if self.state.position.x <= bounds_min.x + 1:
+        if self.state.position.x <= self.bmin.x + 1:
             self.delete = True
 
         # Trigger an end game event if we've hit the player
