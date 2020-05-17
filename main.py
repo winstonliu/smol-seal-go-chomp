@@ -20,12 +20,20 @@ class ActorController:
         self.screen_bounds = (screen_min, screen_max)
         self.npc_bounds = (screen_min - geometry.Vector(200,0), screen_max)
         
+        # Set up actors and sprites
+        player_sprite = assets.game_assets.SealSprite()
         player = actor.PlayerSeal()
         # Set bounds
         player.set_bounds(self.screen_bounds[0], self.screen_bounds[1])
+        # Set size
+        player.set_size(geometry.Vector(player_sprite.rect.width, player_sprite.rect.height))
+        player_sprite.set_actor(player)
+
+        self.actor_sprite_group = pygame.sprite.Group()
+        self.actor_sprite_group.add(player_sprite)
 
         self.actor_dict = {
-                "player": player,
+                "player": player_sprite,
                 "npcs": list(),
         }
 
@@ -53,7 +61,7 @@ class ActorController:
     def handle_keypresses(self):
         keys = pygame.key.get_pressed()
         if keys[pygame.K_SPACE]:
-            return actor.AddSpeedCommand(self.player, self.add_velocity)
+            return actor.AddSpeedCommand(self.player.actor, self.add_velocity)
         return None
 
     def update_actors(self):
@@ -84,7 +92,7 @@ class ActorController:
             self.npcs.remove(d)
 
     def draw_actors(self, screen):
-        pygame.draw.rect(screen, config.Color["blue"], config.rect_to_pygame(self.player.draw()))
+        self.actor_sprite_group.draw(screen)
 
         # Draw NPCs
         for n in self.npcs:

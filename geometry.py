@@ -25,6 +25,9 @@ class Vector:
     def __str__(self):
         return "(" + str(self.x) + "," + str(self.y) + ")"
 
+    def to_tuple(self):
+        return (self.x, self.y)
+
 
 class Rectangle:
     def __init__(self, top_right_corner, size):
