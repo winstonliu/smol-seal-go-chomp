@@ -5,23 +5,25 @@ import functools
 
 import actor
 import config
-import geometry
-import assets
 import events
+import game_assets
+import geometry
+
 from controller import GameController
 from collision import CollisionMonitor
 
 """ This is the main file for the game.  """
 
 class ActorController:
-    def __init__(self, screen_min, screen_max):
+    def __init__(self, asset_loader, screen_min, screen_max):
         self.add_velocity = geometry.Vector(0, 0.01)
 
         self.screen_bounds = (screen_min, screen_max)
         self.npc_bounds = (screen_min - geometry.Vector(200,0), screen_max)
+
         
         # Set up actors and sprites
-        player_sprite = assets.game_assets.SealSprite()
+        player_sprite = game_assets.SealSprite(asset_loader)
         player = actor.PlayerSeal()
         # Set bounds
         player.set_bounds(self.screen_bounds[0], self.screen_bounds[1])
@@ -49,14 +51,15 @@ class ActorController:
         return self.actor_dict["npcs"]
 
     def listen_to_events(self):
-        new_actor_list = events.GameEventsManager.consume("actors_created")
-        if new_actor_list:
-            new_actors = [x.value for x in new_actor_list]
+        sprite_list = events.GameEventsManager.consume("actors_created")
+        if sprite_list:
+            new_sprites = [x.value for x in sprite_list]
             # Set bounds on new actors
-            for n in new_actors:
-                n.set_bounds(self.screen_bounds[0], self.screen_bounds[1])
+            for n in new_sprites:
+                n.actor.set_bounds(self.screen_bounds[0], self.screen_bounds[1])
+                self.actor_sprite_group.add(n)
             # Add new actors to the npc list
-            self.npcs.extend(new_actors)
+            self.npcs.extend(new_sprites)
 
     def handle_keypresses(self):
         keys = pygame.key.get_pressed()
@@ -77,27 +80,15 @@ class ActorController:
             self.game_over = True
             return 
 
-        self.player.update()
-
-        # Mark npcs for deletion so we don't update the list while we're
-        # iterating through it
-        mark_for_deletion = list()
-        for n in self.npcs:
-            n.update()
-            if n.delete:
-                mark_for_deletion.append(n)
+        self.actor_sprite_group.update()
 
         # Delete marked npcs
-        for d in mark_for_deletion:
-            self.npcs.remove(d)
+        for n in self.actor_sprite_group.sprites():
+            if n.actor.delete:
+                self.actor_sprite_group.remove(n)
 
     def draw_actors(self, screen):
         self.actor_sprite_group.draw(screen)
-
-        # Draw NPCs
-        for n in self.npcs:
-            pygame.draw.rect(screen, config.Color[n.color],
-                    config.rect_to_pygame(n.draw()))
 
     def draw_game_over(self, screen):
         text = config.ScreenInfo.font.render("You got eaten! Happy Birthday!!", config.Color["black"], config.Color["white"])
@@ -113,19 +104,21 @@ def main():
     config.ScreenInfo.font = pygame.font.Font("freesansbold.ttf", 24)
     screen = pygame.display.set_mode(config.ScreenInfo.size)
 
+    # Load assets
+    asset_loader = game_assets.AssetLoader()
+
     # Create an actor controller
-    controller = ActorController(geometry.Vector(0,0),
+    controller = ActorController(asset_loader, geometry.Vector(0,0),
             geometry.Vector(config.ScreenInfo.width, config.ScreenInfo.height))
 
     # Create a game manager
-    mananger = GameController(pygame.time.set_timer)
+    manager = GameController(asset_loader, pygame.time.set_timer)
 
     # TODO switch these out with notify event triggers
     PROCESS_CUSTOM_EVENT = {
-            config.EVENT_MAPPING["CREATE_NEW_FISH"]:
-                    functools.partial(mananger.create_npc, actor.NpcFish),
-            config.EVENT_MAPPING["CREATE_NEW_SHARK"]: 
-                    functools.partial(mananger.create_npc, actor.NpcShark),
+            config.EVENT_MAPPING["CREATE_NEW_FISH"]: manager.create_fish,
+            # config.EVENT_MAPPING["CREATE_NEW_SHARK"]: 
+                    # functools.partial(manager.create_npc, actor.NpcShark),
     }
 
     # Main loop, this runs continuously until the player decides to quit

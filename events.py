@@ -54,9 +54,9 @@ class GameEventsManager:
 
 
 class NewActorEvent(GameEvent):
-    def __init__(self, fish):
+    def __init__(self, npc):
         super().__init__("actors_created")
-        self.value = fish
+        self.value = npc
 
 
 class CollisionEvent(GameEvent):

@@ -72,6 +72,7 @@ class PlayerSeal(Actor):
                 0.2,
                 is_player = True)
         self.state.acceleration = geometry.Vector(0, -0.005)
+        self.delete = False
 
     def update(self):
         super().update()

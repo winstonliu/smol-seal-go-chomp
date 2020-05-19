@@ -1,0 +1,16 @@
+{
+    "seal": {
+        "directory": "assets",
+        "sprite": "seal.png",
+        "animations": {
+            "chomp": [
+                "seal_chomp_1.png",
+                "seal_chomp_2.png"
+            ]
+        }
+    },
+    "fish": {
+        "directory": "assets",
+        "sprite": "fish.png"
+    }
+}
