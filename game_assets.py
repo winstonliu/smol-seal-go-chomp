@@ -18,13 +18,10 @@ class AssetLoader:
 
 
 class Sprite(pygame.sprite.Sprite):
-    def __init__(self, asset_object):
+    def __init__(self):
         super().__init__()
         self.actor = None
         self.size = None
-        self.asset_object = asset_object
-        self.asset_dir = self.asset_object["directory"]
-        self.sprite_path = self.asset_object["sprite"]
 
     def set_actor(self, actor):
         self.actor = actor
@@ -41,17 +38,24 @@ class Sprite(pygame.sprite.Sprite):
         # Update current position
         self.rect.topleft = self.actor.state.position.to_tuple()
 
+        # Check if actor has marked itself as delete
+        if self.actor.delete:
+            self.kill()
+
 
 class SealSprite(Sprite):
     ASSET_NAME = "seal"
     def __init__(self, asset_loader):
-        super().__init__(asset_loader.asset_object[self.ASSET_NAME])
+        super().__init__()
+        asset_object = asset_loader.asset_object[self.ASSET_NAME]
+        self.asset_dir = asset_object["directory"]
+        self.sprite_path = asset_object["sprite"]
         self.main_image = self.load_images(self.sprite_path)
         self.rect = self.main_image.get_rect() 
 
         # Load all animations from chomp
         self.chomp_images = [self.load_images(x) for x in
-                self.asset_object["animations"]["chomp"]]
+                asset_object["animations"]["chomp"]]
 
         # Setting a different variable so that we can update the image with
         # animations later
@@ -64,22 +68,33 @@ class SealSprite(Sprite):
         img = pygame.transform.rotozoom(img, 0, 0.5)
         return img
 
-
-class FishSprite(Sprite):
+class FishLoader(AssetLoader):
+    """ Factory class that produces fishes """
     ASSET_NAME = "fish"
-    def __init__(self, asset_loader):
-        super().__init__(asset_loader.asset_object[self.ASSET_NAME])
-        self.main_image = self.load_images(self.sprite_path)
-        self.rect = self.main_image.get_rect() 
+    def __init__(self):
+        super().__init__()
+        fish_object = self.asset_object[self.ASSET_NAME]
+        raw_path = fish_object["sprite"]
+        sprite_path = os.path.join(fish_object["directory"], raw_path)
 
-        # Setting a different variable so that we can update the image with
-        # animations later
-        self.image = self.main_image
+        self.main_image = self.load_images(sprite_path)
 
-    def load_images(self, raw_path):
-        img = Sprite.load_images(os.path.join(self.asset_dir, raw_path))
-
+    def load_images(self, full_path):
+        img = Sprite.load_images(full_path)
         # Resize fish
         img = pygame.transform.rotozoom(img, 0, 0.2)
         return img
 
+    def new_fish_sprite(self):
+        new_sprite = FishSprite(self.main_image)
+        return new_sprite
+
+
+class FishSprite(Sprite):
+    def __init__(self, main_image):
+        super().__init__()
+        self.rect = main_image.get_rect() 
+
+        # Setting a different variable so that we can update the image with
+        # animations later
+        self.image = main_image

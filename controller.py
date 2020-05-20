@@ -11,14 +11,14 @@ import geometry
 """ Game controller """
 
 class GameController:
-    def __init__(self, asset_loader, set_timer_fcn):
+    def __init__(self, fish_loader, set_timer_fcn):
         """ Use the timer set function to initialize the relevant events """
         # Create a new fish every two seconds
         set_timer_fcn(config.EVENT_MAPPING["CREATE_NEW_FISH"], int(2 * 1e3))
         # Need the 0.1 offset, when the timers overlap bad things happen
         set_timer_fcn(config.EVENT_MAPPING["CREATE_NEW_SHARK"], int(5.1 * 1e3))
 
-        self.asset_loader = asset_loader
+        self.fish_loader = fish_loader
 
 
     def create_npc(self, npc_type):
@@ -35,6 +35,6 @@ class GameController:
 
     def create_fish(self):
         npc_fish = self.create_npc(actor.NpcFish)
-        fish_sprite = game_assets.FishSprite(self.asset_loader)
+        fish_sprite = self.fish_loader.new_fish_sprite()
         fish_sprite.set_actor(npc_fish)
         events.GameEventsManager.notify_with_event(events.NewActorEvent(fish_sprite))

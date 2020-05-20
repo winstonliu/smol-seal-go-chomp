@@ -15,19 +15,60 @@ class AddSpeedCommand:
 class Actor:
     MAX_VELOCITY = geometry.Vector(640.0, 360.0)
 
-    def __init__(self, state = geometry.State(), size = geometry.Vector(0,0), bounciness = 0, is_player = False):
+    def __init__(self, state = geometry.State(), is_player = False):
         self.state = state
-        self.bounciness = bounciness 
-        self.size = size
+        self.bounciness = 0
         self.is_player = is_player
         self.color = "white"
+        self.bmin = self.bmax = geometry.Vector(0,0)
 
-    def set_size(self, size):
-        self.size = size
+    # Define properties
 
-    def set_bounds(self, bounds_min, bounds_max):
-        self.bmin = bounds_min
-        self.bmax = bounds_max
+    @property
+    def size(self):
+        return self._size
+
+    @size.setter
+    def size(self, new_size):
+        self._size = new_size
+
+    @property
+    def bounds(self):
+        return (self.bmin, self.bmax)
+
+    @bounds.setter
+    def bounds(self, bounds_tuple):
+        self.bmin = bounds_tuple[0]
+        self.bmax = bounds_tuple[1]
+
+    @property
+    def sprite(self):
+        return self._sprite
+
+    @sprite.setter
+    def sprite(self, sprite):
+        self._sprite = sprite
+
+    @property
+    def bounciness(self):
+        return self._bounciness
+
+    @bounciness.setter
+    def bounciness(self, bounciness):
+        self._bounciness = bounciness
+
+    @property
+    def state(self):
+        return self._state
+
+    # TODO update state to output individual pos, vel, and accel
+    
+    @state.setter
+    def state(self, state):
+        """ State position is clamped to the actor bounds """
+        self._state = state
+
+    # Methods 
 
     def update(self):
         self.state.velocity += self.state.acceleration
@@ -64,13 +105,12 @@ class Actor:
 
 class PlayerSeal(Actor):
     """ This class takes care of all player related stuff. """
-    SIZE = geometry.Vector(50, 50)
     def __init__(self):
         super().__init__(
                 geometry.State(position = geometry.Vector(100,100)),
-                self.SIZE, 
-                0.2,
                 is_player = True)
+        self.size = geometry.Vector(50, 50)
+        self.bounciness = 0
         self.state.acceleration = geometry.Vector(0, -0.005)
         self.delete = False
 
@@ -82,8 +122,9 @@ class NpcFish(Actor):
     """ It's a fish! """
     SIZE = geometry.Vector(10, 10)
     def __init__(self, state):
-        super().__init__(state, self.SIZE)
+        super().__init__(state)
         self.delete = False
+        self.size = self.SIZE
         self.color = "red"
 
     def update(self):
@@ -101,8 +142,9 @@ class NpcShark(Actor):
     """ Chomp! """
     SIZE = geometry.Vector(75, 25)
     def __init__(self, state):
-        super().__init__(state, self.SIZE)
+        super().__init__(state)
         self.delete = False
+        self.size = self.SIZE
         self.color = "purple"
 
     def update(self):

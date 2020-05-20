@@ -10,7 +10,6 @@ import game_assets
 import geometry
 
 from controller import GameController
-from collision import CollisionMonitor
 
 """ This is the main file for the game.  """
 
@@ -26,29 +25,31 @@ class ActorController:
         player_sprite = game_assets.SealSprite(asset_loader)
         player = actor.PlayerSeal()
         # Set bounds
-        player.set_bounds(self.screen_bounds[0], self.screen_bounds[1])
+        player.bounds = (self.screen_bounds[0], self.screen_bounds[1])
         # Set size
-        player.set_size(geometry.Vector(player_sprite.rect.width, player_sprite.rect.height))
+        player.size = geometry.Vector(player_sprite.rect.width, player_sprite.rect.height)
         player_sprite.set_actor(player)
 
+        self.player = player_sprite
+
+        self.player_sprite_group = pygame.sprite.Group()
+        self.player_sprite_group.add(player_sprite)
         self.actor_sprite_group = pygame.sprite.Group()
-        self.actor_sprite_group.add(player_sprite)
 
         self.actor_dict = {
                 "player": player_sprite,
                 "npcs": list(),
         }
 
-        self.collision_monitor = CollisionMonitor(self.actor_dict)
         self.game_over = False
 
     @property
     def player(self):
         return self.actor_dict["player"]
 
-    @property
-    def npcs(self):
-        return self.actor_dict["npcs"]
+    @player.setter
+    def player(self, player):
+        self._player = player
 
     def listen_to_events(self):
         sprite_list = events.GameEventsManager.consume("actors_created")
@@ -56,10 +57,8 @@ class ActorController:
             new_sprites = [x.value for x in sprite_list]
             # Set bounds on new actors
             for n in new_sprites:
-                n.actor.set_bounds(self.screen_bounds[0], self.screen_bounds[1])
+                n.actor.bounds = (self.screen_bounds[0], self.screen_bounds[1])
                 self.actor_sprite_group.add(n)
-            # Add new actors to the npc list
-            self.npcs.extend(new_sprites)
 
     def handle_keypresses(self):
         keys = pygame.key.get_pressed()
@@ -71,8 +70,8 @@ class ActorController:
         # Create new actors if we've received the signal
         self.listen_to_events()
         # Check for collisions
-        # TODO replace with sprite collisions
-        self.collision_monitor.check_player_collision()
+        pygame.sprite.spritecollide(self.player,
+                self.actor_sprite_group, True) 
 
         # Check if we've received a game over message
         result = events.GameEventsManager.consume("got_eaten")
@@ -80,14 +79,11 @@ class ActorController:
             self.game_over = True
             return 
 
+        self.player_sprite_group.update()
         self.actor_sprite_group.update()
 
-        # Delete marked npcs
-        for n in self.actor_sprite_group.sprites():
-            if n.actor.delete:
-                self.actor_sprite_group.remove(n)
-
     def draw_actors(self, screen):
+        self.player_sprite_group.draw(screen)
         self.actor_sprite_group.draw(screen)
 
     def draw_game_over(self, screen):
@@ -106,13 +102,14 @@ def main():
 
     # Load assets
     asset_loader = game_assets.AssetLoader()
+    fish_loader = game_assets.FishLoader()
 
     # Create an actor controller
     controller = ActorController(asset_loader, geometry.Vector(0,0),
             geometry.Vector(config.ScreenInfo.width, config.ScreenInfo.height))
 
     # Create a game manager
-    manager = GameController(asset_loader, pygame.time.set_timer)
+    manager = GameController(fish_loader, pygame.time.set_timer)
 
     # TODO switch these out with notify event triggers
     PROCESS_CUSTOM_EVENT = {
