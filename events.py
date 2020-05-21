@@ -59,37 +59,11 @@ class NewActorEvent(GameEvent):
         self.value = npc
 
 
-class CollisionEvent(GameEvent):
-    COLLISION_KEYS = ["player_collision", "npc_collision"]
-
-    def __init__(self, actor_a, actor_b, a_is_player):
-        self.a = actor_a
-        self.b = actor_b
-        key = self.COLLISION_KEYS[0] if a_is_player else self.COLLISION_KEYS[1]
-        super().__init__(key)
-
-    def contains(self, actor):
-        return actor == self.a or actor == self.b
-
-    @classmethod
-    def player_key(cls):
-        return cls.COLLISION_KEYS[0]
-
-    @classmethod
-    def npc_key(cls):
-        return cls.COLLISION_KEYS[1]
-
-    @staticmethod
-    def register_collision(actor_a, actor_b, a_is_player):
-        new_collision = CollisionEvent(actor_a, actor_b, a_is_player)
-        GameEventsManager.notify(new_collision.key, new_collision)
-
-
 class AteBySharkEvent(GameEvent):
     def __init__(self):
         super().__init__("got_eaten")
 
+
 class AteFishEvent(GameEvent):
     def __init__(self):
         super().__init__("ate_fish")
-
