@@ -110,7 +110,7 @@ class PlayerSeal(Actor):
                 geometry.State(position = geometry.Vector(100,100)),
                 is_player = True)
         self.size = geometry.Vector(50, 50)
-        self.bounciness = 0
+        self.bounciness = 0.4
         self.state.acceleration = geometry.Vector(0, -0.005)
         self.delete = False
 
@@ -133,8 +133,8 @@ class NpcFish(Actor):
 
         # Delete if we've hit the player
         result = events.GameEventsManager.consume_event_for_value(events.CollisionEvent.player_key(), self)
-        # Delete if we've hit the edge, including a fudge factor
-        if len(result) > 0 or self.state.position.x <= self.bmin.x + 1:
+        # Delete if we've hit the edge
+        if len(result) > 0 or self.state.position.x <= self.bmin.x:
             self.delete = True
 
 

@@ -33,6 +33,3 @@ class MetaColor(type):
 
 class Color(object, metaclass=MetaColor):
     pass
-
-def rect_to_pygame(rectangle):
-    return pygame.Rect(rectangle.top_right_corner.x, rectangle.top_right_corner.y , rectangle.size.x, rectangle.size.y)

@@ -12,5 +12,9 @@
     "fish": {
         "directory": "assets",
         "sprite": "fish.png"
+    },
+    "shark": {
+        "directory": "assets",
+        "sprite": "shark.png"
     }
 }

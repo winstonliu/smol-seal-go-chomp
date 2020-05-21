@@ -30,26 +30,15 @@ class ActorController:
         player.size = geometry.Vector(player_sprite.rect.width, player_sprite.rect.height)
         player_sprite.set_actor(player)
 
-        self.player = player_sprite
-
-        self.player_sprite_group = pygame.sprite.Group()
+        self.player_sprite_group = pygame.sprite.GroupSingle()
         self.player_sprite_group.add(player_sprite)
         self.actor_sprite_group = pygame.sprite.Group()
-
-        self.actor_dict = {
-                "player": player_sprite,
-                "npcs": list(),
-        }
 
         self.game_over = False
 
     @property
     def player(self):
-        return self.actor_dict["player"]
-
-    @player.setter
-    def player(self, player):
-        self._player = player
+        return self.player_sprite_group.sprites()[0]
 
     def listen_to_events(self):
         sprite_list = events.GameEventsManager.consume("actors_created")
@@ -103,19 +92,19 @@ def main():
     # Load assets
     asset_loader = game_assets.AssetLoader()
     fish_loader = game_assets.FishLoader()
+    shark_loader = game_assets.SharkLoader()
 
     # Create an actor controller
     controller = ActorController(asset_loader, geometry.Vector(0,0),
             geometry.Vector(config.ScreenInfo.width, config.ScreenInfo.height))
 
     # Create a game manager
-    manager = GameController(fish_loader, pygame.time.set_timer)
+    manager = GameController(fish_loader, shark_loader, pygame.time.set_timer)
 
     # TODO switch these out with notify event triggers
     PROCESS_CUSTOM_EVENT = {
             config.EVENT_MAPPING["CREATE_NEW_FISH"]: manager.create_fish,
-            # config.EVENT_MAPPING["CREATE_NEW_SHARK"]: 
-                    # functools.partial(manager.create_npc, actor.NpcShark),
+            config.EVENT_MAPPING["CREATE_NEW_SHARK"]: manager.create_shark,
     }
 
     # Main loop, this runs continuously until the player decides to quit
