@@ -123,7 +123,7 @@ def main():
         if (command):
             command.execute()
 
-        screen.fill(config.Color["black"])
+        screen.fill(config.Color["blue"])
 
         if not controller.game_over:
             controller.update_actors()

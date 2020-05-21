@@ -120,42 +120,21 @@ class PlayerSeal(Actor):
 
 class NpcFish(Actor):
     """ It's a fish! """
-    SIZE = geometry.Vector(10, 10)
-    def __init__(self, state):
+    def __init__(self, state, size):
         super().__init__(state)
         self.delete = False
-        self.size = self.SIZE
-        self.color = "red"
+        self.size = size
 
     def update(self):
         """ Destructive event checking """
         super().update()
 
-        # Delete if we've hit the player
-        result = events.GameEventsManager.consume_event_for_value(events.CollisionEvent.player_key(), self)
         # Delete if we've hit the edge
-        if len(result) > 0 or self.state.position.x <= self.bmin.x:
+        if self.state.position.x <= self.bmin.x:
             self.delete = True
 
 
-class NpcShark(Actor):
+class NpcShark(NpcFish):
     """ Chomp! """
-    SIZE = geometry.Vector(75, 25)
-    def __init__(self, state):
-        super().__init__(state)
-        self.delete = False
-        self.size = self.SIZE
-        self.color = "purple"
-
-    def update(self):
-        """ Destructive event checking """
-        super().update()
-
-        # Delete if we've hit the edge, including a fudge factor
-        if self.state.position.x <= self.bmin.x + 1:
-            self.delete = True
-
-        # Trigger an end game event if we've hit the player
-        result = events.GameEventsManager.consume_event_for_value(events.CollisionEvent.player_key(), self)
-        if len(result) > 0:
-            events.GameEventsManager.notify_with_event(events.AteBySharkEvent())
+    def __init__(self, state, size):
+        super().__init__(state, size)

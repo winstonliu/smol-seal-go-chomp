@@ -29,7 +29,7 @@ class GameController:
         npc_state.position.y = random.randrange(config.ScreenInfo.height - npc_size.y)
 
         npc_state.velocity.x = -0.4
-        new_npc = npc_type(npc_state)
+        new_npc = npc_type(npc_state, npc_size)
         return new_npc
 
 
