@@ -11,6 +11,28 @@ def load_img_with_alpha(path):
     return img
 
 
+class Animation:
+    def __init__(self, image_list, num_frames):
+        self.image_list = image_list
+        self.num_frames = num_frames
+        self.active = False
+        self.index = 0
+
+    def tick(self):
+        if self.active:
+            if self.index >= len(self.image_list) * self.num_frames:
+                # Set animation to false if this is the last image
+                self.active = False
+                self.index = 0
+                return None
+
+            current_image = self.image_list[self.index // self.num_frames]
+            self.index += 1
+
+            return current_image
+        return None
+
+
 class AssetLoader:
     ASSET_LIST = "assets/game_assets.json"
     def __init__(self):
@@ -88,12 +110,15 @@ class SealSprite(Sprite):
         self.rect = self.main_image.get_rect() 
 
         # Load all animations from chomp
-        self.chomp_images = [self.load_images(x) for x in
+        chomp_images = [self.load_images(x) for x in
                 asset_object["animations"]["chomp"]]
+        self.chomp = Animation(chomp_images, 30)
 
         # Setting a different variable so that we can update the image with
         # animations later
         self.image = self.main_image
+
+        self.current_animation = None
 
     def load_images(self, raw_path):
         img = Sprite.load_images(os.path.join(self.asset_dir, raw_path))
@@ -101,6 +126,19 @@ class SealSprite(Sprite):
         # Resize to half the size
         img = pygame.transform.rotozoom(img, 0, 0.5)
         return img
+
+    def update(self):
+        """ Custom update function to take care of seal animations."""
+        super().update()
+
+        if events.GameEventsManager.peek("ate_fish"):
+            self.chomp.active = True
+
+        result = self.chomp.tick()
+        if result:
+            self.image = result
+        else:
+            self.image = self.main_image
 
 
 class FishSprite(Sprite):

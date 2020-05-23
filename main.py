@@ -31,9 +31,10 @@ class ActorController:
 
         self.player_sprite_group = pygame.sprite.GroupSingle()
         self.player_sprite_group.add(player_sprite)
+
         self.actor_sprite_group = pygame.sprite.Group()
 
-        self.score = int(0)
+        self.score = 0
 
         self.game_over = False
 
@@ -68,14 +69,18 @@ class ActorController:
         if (result):
             self.game_over = True
             return 
+        
+        # Ordering is important here!
+        # The sprite group update must be before the score update because the
+        # sprites update uses the ate fish event
+        self.player_sprite_group.update()
+        self.actor_sprite_group.update()
 
         # Update score counter
         result = events.GameEventsManager.consume("ate_fish")
         if (result):
             self.score += 1
 
-        self.player_sprite_group.update()
-        self.actor_sprite_group.update()
 
     def draw_actors(self, screen):
         # Draw score counter
