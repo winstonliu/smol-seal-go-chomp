@@ -117,6 +117,16 @@ class SealSprite(Sprite):
         # Setting a different variable so that we can update the image with
         # animations later
         self.image = self.main_image
+        # Set collision box to front quarter of the seal
+        new_rect = self.image.get_rect().copy()
+        new_rect.width /= 3
+        new_rect.topright = self.image.get_rect().topright
+        cropped_surface = self.image.subsurface(new_rect)
+        full_size_surface = pygame.Surface([self.image.get_rect().width,
+            self.image.get_rect().height], pygame.SRCALPHA)
+        full_size_surface = full_size_surface.convert_alpha()
+        full_size_surface.blit(cropped_surface, new_rect)
+        self.mask = pygame.mask.from_surface(full_size_surface)
 
         self.current_animation = None
 

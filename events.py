@@ -52,12 +52,15 @@ class GameEventsManager:
             return output_list
         return list()
 
-
-class NewActorEvent(GameEvent):
+class NewFishEvent(GameEvent):
     def __init__(self, npc):
-        super().__init__("actors_created")
+        super().__init__("new_fish")
         self.value = npc
 
+class NewSharkEvent(GameEvent):
+    def __init__(self, npc):
+        super().__init__("new_shark")
+        self.value = npc
 
 class AteBySharkEvent(GameEvent):
     def __init__(self):

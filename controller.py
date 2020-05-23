@@ -40,7 +40,7 @@ class GameController:
         npc_fish = self.create_npc(actor.NpcFish, npc_size)
 
         fish_sprite.set_actor(npc_fish)
-        events.GameEventsManager.notify_with_event(events.NewActorEvent(fish_sprite))
+        events.GameEventsManager.notify_with_event(events.NewFishEvent(fish_sprite))
 
 
     def create_shark(self):
@@ -51,4 +51,4 @@ class GameController:
         npc.state.velocity.x = -0.8
 
         shark_sprite.set_actor(npc)
-        events.GameEventsManager.notify_with_event(events.NewActorEvent(shark_sprite))
+        events.GameEventsManager.notify_with_event(events.NewSharkEvent(shark_sprite))
