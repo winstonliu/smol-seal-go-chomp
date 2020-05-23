@@ -19,7 +19,6 @@ class ActorController:
 
         self.screen_bounds = (screen_min, screen_max)
         self.npc_bounds = (screen_min - geometry.Vector(200,0), screen_max)
-
         
         # Set up actors and sprites
         player_sprite = game_assets.SealSprite(asset_loader)
@@ -33,6 +32,8 @@ class ActorController:
         self.player_sprite_group = pygame.sprite.GroupSingle()
         self.player_sprite_group.add(player_sprite)
         self.actor_sprite_group = pygame.sprite.Group()
+
+        self.score = int(0)
 
         self.game_over = False
 
@@ -68,10 +69,21 @@ class ActorController:
             self.game_over = True
             return 
 
+        # Update score counter
+        result = events.GameEventsManager.consume("ate_fish")
+        if (result):
+            self.score += 1
+
         self.player_sprite_group.update()
         self.actor_sprite_group.update()
 
     def draw_actors(self, screen):
+        # Draw score counter
+        text = config.ScreenInfo.font.render("Score: " + str(self.score), config.Color["black"], config.Color["white"])
+        text_rect = text.get_rect()
+        text_rect.topright = (int(config.ScreenInfo.width) - 10, 10)
+        screen.blit(text, text_rect)
+
         self.player_sprite_group.draw(screen)
         self.actor_sprite_group.draw(screen)
 
@@ -79,7 +91,7 @@ class ActorController:
         text = config.ScreenInfo.font.render("You got eaten! Happy Birthday!!", config.Color["black"], config.Color["white"])
         text_rect = text.get_rect()
         # Center the text
-        text_rect.topleft = (int((config.ScreenInfo.width - text_rect.width) / 2.0), int((config.ScreenInfo.height - text_rect.height) / 2.0))
+        text_rect.center = (int(config.ScreenInfo.width / 2.0), int(config.ScreenInfo.height / 2.0))
         screen.blit(text, text_rect)
 
 
