@@ -48,7 +48,7 @@ class ActorController:
             new_sprites = [x.value for x in sprite_list]
             # Set bounds on new actors
             for n in new_sprites:
-                n.actor.bounds = (self.screen_bounds[0], self.screen_bounds[1])
+                n.actor.bounds = (self.screen_bounds[0] - geometry.Vector(200,0), self.screen_bounds[1] + geometry.Vector(100, 0))
                 self.actor_sprite_group.add(n)
 
     def handle_keypresses(self):
