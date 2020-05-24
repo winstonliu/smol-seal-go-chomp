@@ -104,10 +104,11 @@ class PlayerSeal(Actor):
         self.bounciness = 0.4
         self.state.acceleration = geometry.Vector(0, -0.005)
         self.state.velocity = geometry.Vector(0,0)
+        self.delta_velocity = geometry.Vector(0, 0.015)
         self.delete = False
 
     def add_velocity(self):
-        super().add_velocity(geometry.Vector(0, 0.01))
+        super().add_velocity(self.delta_velocity)
 
     def update(self):
         super().update()

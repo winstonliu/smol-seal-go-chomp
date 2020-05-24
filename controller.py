@@ -43,6 +43,10 @@ class ActorController:
     def player(self):
         return self.player_sprite_group.sprites()[0]
 
+    def velocity_delta(self):
+        add_velocity = pow(1.05, self.score) - 1
+        return geometry.Vector(-add_velocity, 0)
+
     def listen_to_events(self):
         # Create actor bounds
         actor_bounds = self.npc_bounds
@@ -53,6 +57,8 @@ class ActorController:
             # Set bounds on new actors
             for n in new_sprites:
                 n.actor.bounds = actor_bounds
+                # This will make the fish go faster
+                # n.actor.add_velocity(self.velocity_delta())
                 self.fish_sprite_group.add(n)
 
         sprite_list = events.GameEventsManager.consume("new_shark")
@@ -61,6 +67,7 @@ class ActorController:
             # Set bounds on new actors
             for n in new_sprites:
                 n.actor.bounds = actor_bounds
+                # n.actor.add_velocity(self.velocity_delta())
                 self.shark_sprite_group.add(n)
 
     def update_actors(self):
@@ -88,6 +95,15 @@ class ActorController:
         if (result):
             self.chomp_audio.play(0)
             self.score += 1
+
+            # The seal got fatter so she floats to the surface faster
+            delta_velocity = self.player.actor.delta_velocity
+            seal_accel = self.player.actor.state.acceleration
+            diff = seal_accel + delta_velocity
+            seal_accel.y -= diff.y * 0.05
+
+            print(self.player.actor.state.acceleration)
+
 
     def draw_actors(self, screen):
         # Draw score counter
@@ -211,9 +227,9 @@ class NpcCreator:
     def __init__(self, fish_loader, shark_loader, set_timer_fcn):
         """ Use the timer set function to initialize the relevant events """
         # Create a new fish every two seconds
-        set_timer_fcn(config.EVENT_MAPPING["CREATE_NEW_FISH"], int(2 * 1e3))
+        set_timer_fcn(config.EVENT_MAPPING["CREATE_NEW_FISH"], int(1 * 1e3))
         # Need the 0.1 offset, when the timers overlap bad things happen
-        set_timer_fcn(config.EVENT_MAPPING["CREATE_NEW_SHARK"], int(5.1 * 1e3))
+        set_timer_fcn(config.EVENT_MAPPING["CREATE_NEW_SHARK"], int(2.1 * 1e3))
 
         self.fish_loader = fish_loader
         self.shark_loader = shark_loader
