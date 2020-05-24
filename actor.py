@@ -3,15 +3,6 @@
 import geometry
 import events
 
-class AddSpeedCommand:
-    def __init__(self, unit, velocity):
-        self.unit = unit
-        self.velocity = velocity
-
-    def execute(self):
-        self.unit.add_velocity(self.velocity)
-
-
 class Actor:
     MAX_VELOCITY = geometry.Vector(640.0, 360.0)
 
@@ -107,12 +98,16 @@ class PlayerSeal(Actor):
     """ This class takes care of all player related stuff. """
     def __init__(self):
         super().__init__(
-                geometry.State(position = geometry.Vector(100,150)),
+                geometry.State(position = geometry.Vector(100,200)),
                 is_player = True)
         self.size = geometry.Vector(50, 50)
         self.bounciness = 0.4
         self.state.acceleration = geometry.Vector(0, -0.005)
+        self.state.velocity = geometry.Vector(0,0)
         self.delete = False
+
+    def add_velocity(self):
+        super().add_velocity(geometry.Vector(0, 0.01))
 
     def update(self):
         super().update()

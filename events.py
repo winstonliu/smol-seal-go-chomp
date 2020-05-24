@@ -66,7 +66,6 @@ class AteBySharkEvent(GameEvent):
     def __init__(self):
         super().__init__("got_eaten")
 
-
 class AteFishEvent(GameEvent):
     def __init__(self):
         super().__init__("ate_fish")
