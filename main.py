@@ -46,7 +46,10 @@ def main():
     pygame.init()
     config.ScreenInfo.font = pygame.font.Font("freesansbold.ttf", 24)
     screen = pygame.display.set_mode(config.ScreenInfo.size)
-    pygame.display.set_caption("Smol Seal Goes CHOMP")
+
+    seal_icon = pygame.image.load("assets/seal.ico").convert_alpha()
+    pygame.display.set_caption("Smol Seal go CHOMP")
+    pygame.display.set_icon(seal_icon)
 
     game_controller, PROCESS_CUSTOM_EVENT = setup(screen)
 

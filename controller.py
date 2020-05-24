@@ -184,7 +184,7 @@ class GameController:
         # Handle game mode actions
         self.handle_gamemode[self.mode](screen)
 
-    def press_to_continue(self, screen, text_string = "Press s to start"):
+    def press_to_continue(self, screen, text_string = "Press SPACE to swim, press s to start"):
         text = config.ScreenInfo.font.render(text_string, True,
                 config.Color["black"])
         text_rect = text.get_rect()
@@ -193,7 +193,7 @@ class GameController:
         screen.blit (text, text_rect)
 
     def start_screen_actions(self, screen):
-        text = config.ScreenInfo.font.render("SMOL SEAL GOES CHOMP", True,
+        text = config.ScreenInfo.font.render("SMOL SEAL GO CHOMP", True,
                 config.Color["black"])
         text_rect = text.get_rect()
         text_rect.center = (int(config.ScreenInfo.width / 2.0),
