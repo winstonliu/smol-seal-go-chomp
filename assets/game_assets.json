@@ -16,5 +16,9 @@
     "shark": {
         "directory": "assets",
         "sprite": "shark.png"
+    },
+    "background": {
+        "directory": "assets",
+        "sprite": "background.png"
     }
 }

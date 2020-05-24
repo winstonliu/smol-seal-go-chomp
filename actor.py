@@ -107,7 +107,7 @@ class PlayerSeal(Actor):
     """ This class takes care of all player related stuff. """
     def __init__(self):
         super().__init__(
-                geometry.State(position = geometry.Vector(100,100)),
+                geometry.State(position = geometry.Vector(100,150)),
                 is_player = True)
         self.size = geometry.Vector(50, 50)
         self.bounciness = 0.4

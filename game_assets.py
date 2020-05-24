@@ -74,6 +74,14 @@ class SharkLoader(FishLoader):
         new_sprite = SharkSprite(self.main_image)
         return new_sprite
 
+class BackgroundLoader(FishLoader):
+    ASSET_NAME = "background"
+    def __init__(self):
+        super().__init__()
+
+    def load_images(self, full_path):
+        return pygame.image.load(full_path).convert()
+
 class Sprite(pygame.sprite.Sprite):
     def __init__(self):
         super().__init__()
@@ -169,9 +177,3 @@ class FishSprite(Sprite):
 class SharkSprite(FishSprite):
     def __init__(self, main_image):
         super().__init__(main_image)
-
-    def kill(self):
-        if not self.actor.delete:
-            # We ate the seal
-            events.GameEventsManager.notify_with_event(events.AteBySharkEvent())
-        super().kill()

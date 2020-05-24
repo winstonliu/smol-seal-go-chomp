@@ -17,8 +17,9 @@ class ActorController:
     def __init__(self, asset_loader, screen_min, screen_max):
         self.add_velocity = geometry.Vector(0, 0.01)
 
-        self.screen_bounds = (screen_min, screen_max)
-        self.npc_bounds = (screen_min - geometry.Vector(200,0), screen_max)
+        WAVE_HEIGHT = 150
+        self.screen_bounds = (screen_min + geometry.Vector(0,150), screen_max)
+        self.npc_bounds = (screen_min - geometry.Vector(200,-150), screen_max + geometry.Vector(100,0))
         
         # Set up actors and sprites
         player_sprite = game_assets.SealSprite(asset_loader)
@@ -46,8 +47,7 @@ class ActorController:
 
     def listen_to_events(self):
         # Create actor bounds
-        actor_bounds = (self.screen_bounds[0] - geometry.Vector(200,0),
-                self.screen_bounds[1] + geometry.Vector(100, 0))
+        actor_bounds = self.npc_bounds
 
         sprite_list = events.GameEventsManager.consume("new_fish")
         if sprite_list:
@@ -77,11 +77,8 @@ class ActorController:
         # Check for collisions
         pygame.sprite.spritecollide(self.player,
                 self.fish_sprite_group, True, pygame.sprite.collide_mask) 
-        pygame.sprite.spritecollide(self.player,
-                self.shark_sprite_group, True) 
 
-        # Check if we've received a game over message
-        result = events.GameEventsManager.consume("got_eaten")
+        result = pygame.sprite.spritecollide(self.player, self.shark_sprite_group, False) 
         if (result):
             self.game_over = True
             return 
@@ -101,9 +98,9 @@ class ActorController:
 
     def draw_actors(self, screen):
         # Draw score counter
-        text = config.ScreenInfo.font.render("Score: " + str(self.score), config.Color["black"], config.Color["white"])
+        text = config.ScreenInfo.font.render("Fishes Eaten: " + str(self.score), config.Color["black"], config.Color["black"])
         text_rect = text.get_rect()
-        text_rect.topright = (int(config.ScreenInfo.width) - 10, 10)
+        text_rect.bottomright = (config.ScreenInfo.width - 10, config.ScreenInfo.height - 10)
         screen.blit(text, text_rect)
 
         # Draw everything onto the screen
@@ -131,6 +128,7 @@ def main():
     asset_loader = game_assets.AssetLoader()
     fish_loader = game_assets.FishLoader()
     shark_loader = game_assets.SharkLoader()
+    background_loader = game_assets.BackgroundLoader()
 
     # Create an actor controller
     controller = ActorController(asset_loader, geometry.Vector(0,0),
@@ -161,9 +159,10 @@ def main():
         if (command):
             command.execute()
 
-        screen.fill(config.Color["blue"])
-
         if not controller.game_over:
+            screen.fill(config.Color["blue"])
+            screen.blit(background_loader.main_image, pygame.Rect(0,0,config.ScreenInfo.width, config.ScreenInfo.height))
+
             controller.update_actors()
             controller.draw_actors(screen)
         else:
