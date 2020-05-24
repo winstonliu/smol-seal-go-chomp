@@ -227,7 +227,7 @@ class NpcCreator:
         # Create a new fish every two seconds
         set_timer_fcn(config.EVENT_MAPPING["CREATE_NEW_FISH"], int(1 * 1e3))
         # Need the 0.1 offset, when the timers overlap bad things happen
-        set_timer_fcn(config.EVENT_MAPPING["CREATE_NEW_SHARK"], int(2.1 * 1e3))
+        set_timer_fcn(config.EVENT_MAPPING["CREATE_NEW_SHARK"], int(2.3 * 1e3))
 
         self.fish_loader = fish_loader
         self.shark_loader = shark_loader
@@ -239,7 +239,7 @@ class NpcCreator:
         npc_state.position.x = config.ScreenInfo.width - npc_size.x
         npc_state.position.y = random.randrange(config.ScreenInfo.height - npc_size.y)
 
-        npc_state.velocity.x = -0.4
+        npc_state.velocity.x = -1.8
         new_npc = npc_type(npc_state, npc_size)
         return new_npc
 
@@ -259,7 +259,7 @@ class NpcCreator:
 
         npc_size = geometry.Vector(*shark_sprite.rect.size)
         npc = self.create_npc(actor.NpcShark, npc_size)
-        npc.state.velocity.x = -0.8
+        npc.state.velocity.x = -3.0
 
         shark_sprite.set_actor(npc)
         events.GameEventsManager.notify_with_event(events.NewSharkEvent(shark_sprite))

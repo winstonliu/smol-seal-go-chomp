@@ -120,7 +120,7 @@ class SealSprite(Sprite):
         # Load all animations from chomp
         chomp_images = [self.load_images(x) for x in
                 asset_object["animations"]["chomp"]]
-        self.chomp = Animation(chomp_images, 40)
+        self.chomp = Animation(chomp_images, 10)
 
         # Setting a different variable so that we can update the image with
         # animations later

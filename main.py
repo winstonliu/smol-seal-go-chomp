@@ -49,6 +49,8 @@ def main():
 
     game_controller, PROCESS_CUSTOM_EVENT = setup(screen)
 
+    clock = pygame.time.Clock()
+
     # Main loop, this runs continuously until the player decides to quit
     running = True
     while running:
@@ -61,7 +63,15 @@ def main():
             if event.type in PROCESS_CUSTOM_EVENT and game_controller.active():
                 PROCESS_CUSTOM_EVENT[event.type]()
         game_controller.tick(screen)
-        pygame.display.flip()
+
+        # FPS printout
+        # fps = str(int(clock.get_fps()))
+        # fps_text = config.ScreenInfo.font.render(fps, 1, pygame.Color("black"))
+        # screen.blit(fps_text, (10,0))
+
+        # Set frame rate to 120
+        clock.tick(120)
+        pygame.display.update()
 
         if game_controller.do_reset:
             game_controller, PROCESS_CUSTOM_EVENT = setup(screen)
