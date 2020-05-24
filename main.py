@@ -15,13 +15,12 @@ import controller
 
 def setup(screen):
     # Load assets
-    asset_loader = game_assets.AssetLoader()
     fish_loader = game_assets.FishLoader()
     shark_loader = game_assets.SharkLoader()
     background_loader = game_assets.BackgroundLoader()
 
     # Create an actor controller
-    actor_controller = controller.ActorController(asset_loader, geometry.Vector(0,0),
+    actor_controller = controller.ActorController(geometry.Vector(0,0),
             geometry.Vector(config.ScreenInfo.width, config.ScreenInfo.height))
 
     game_controller = controller.GameController(actor_controller,

@@ -12,13 +12,13 @@ import geometry
 """ Controller classes """
 
 class ActorController:
-    def __init__(self, asset_loader, screen_min, screen_max):
+    def __init__(self, screen_min, screen_max):
         WAVE_HEIGHT = 150
         self.screen_bounds = (screen_min + geometry.Vector(0,150), screen_max)
         self.npc_bounds = (screen_min - geometry.Vector(200,-150), screen_max + geometry.Vector(100,0))
         
         # Set up actors and sprites
-        player_sprite = game_assets.SealSprite(asset_loader)
+        player_sprite = game_assets.SealSprite(game_assets.AssetLoader())
         player = actor.PlayerSeal()
         # Set bounds
         player.bounds = (self.screen_bounds[0], self.screen_bounds[1])
@@ -32,6 +32,10 @@ class ActorController:
         # Create npc groups
         self.fish_sprite_group = pygame.sprite.Group()
         self.shark_sprite_group = pygame.sprite.Group()
+
+        # Audio
+        self.chomp_audio = game_assets.ChompAudioLoader().audio
+        self.brrr_audio = game_assets.BrrrAudioLoader().audio
 
         self.score = 0
 
@@ -70,6 +74,7 @@ class ActorController:
                 self.shark_sprite_group, False) 
         if (result):
             events.GameEventsManager.notify_with_event(events.AteBySharkEvent())
+            self.brrr_audio.play(0)
         
         # Ordering is important here!
         # The sprite group update must be before the score update because the
@@ -81,6 +86,7 @@ class ActorController:
         # Update score counter
         result = events.GameEventsManager.consume("ate_fish")
         if (result):
+            self.chomp_audio.play(0)
             self.score += 1
 
     def draw_actors(self, screen):
@@ -129,12 +135,19 @@ class GameController:
 
         self.actor_controller = actor_controller
         self.background_loader = background_loader
+        self.happy_birthday_audio = game_assets.HappyBirthdayLoader().audio
 
         self.do_reset = False
 
     def transition(self):
         if self.mode == self.MODE[2]:
             self.do_reset = True
+
+        # Configure playback
+        if self.mode == self.MODE[1]:
+            self.happy_birthday_audio.play(-1)
+        else:
+            self.happy_birthday_audio.fadeout(100)
 
         self.mode = self.transition_dict[self.mode](self)
 

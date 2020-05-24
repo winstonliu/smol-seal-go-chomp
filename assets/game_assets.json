@@ -20,5 +20,17 @@
     "background": {
         "directory": "assets",
         "sprite": "background.png"
+    },
+    "chomp_audio": {
+        "directory": "assets",
+        "ogg": "chomp.ogg"
+    },
+    "brrr_audio": {
+        "directory": "assets",
+        "ogg": "br_br_brrr.ogg"
+    },
+    "happy_birthday": {
+        "directory": "assets",
+        "ogg": "happy_birthday.ogg"
     }
 }

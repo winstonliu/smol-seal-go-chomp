@@ -177,3 +177,22 @@ class FishSprite(Sprite):
 class SharkSprite(FishSprite):
     def __init__(self, main_image):
         super().__init__(main_image)
+
+class ChompAudioLoader(AssetLoader):
+    ASSET_NAME = "chomp_audio"
+    def __init__(self):
+        super().__init__()
+        chomp_object = self.asset_object[self.ASSET_NAME]
+        raw_path = chomp_object["ogg"]
+        ogg_path = os.path.join(chomp_object["directory"], raw_path)
+        self.audio = pygame.mixer.Sound(ogg_path)
+
+class BrrrAudioLoader(ChompAudioLoader):
+    ASSET_NAME = "brrr_audio"
+    def __init__(sefl):
+        super().__init__()
+
+class HappyBirthdayLoader(ChompAudioLoader):
+    ASSET_NAME = "happy_birthday"
+    def __init__(self):
+        super().__init__()
