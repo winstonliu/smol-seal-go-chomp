@@ -102,8 +102,6 @@ class ActorController:
             diff = seal_accel + delta_velocity
             seal_accel.y -= diff.y * 0.05
 
-            print(self.player.actor.state.acceleration)
-
 
     def draw_actors(self, screen):
         # Draw score counter
